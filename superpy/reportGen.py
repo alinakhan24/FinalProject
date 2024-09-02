@@ -17,7 +17,6 @@ class ReportGen:
     
     def getRevenue(self):
         sold = []
-        inventory = []
         try:
             with open("sold.csv", 'r') as file:
                 for line in file:
@@ -27,7 +26,7 @@ class ReportGen:
                     if date_object <= current_object:
                         sold.append(Item(split_result[0], split_result[1], None, split_result[2], split_result[4]))
         except FileNotFoundError:
-            print(f"File not found: {file_path}")
+            print(f"File not found: sold.csv")
         except Exception as e:
             print(f"An error occurred: {e}")
 
@@ -48,7 +47,7 @@ class ReportGen:
                     if date_object <= current_object:
                         sold.append(Item(split_result[0], split_result[1], None, split_result[2], split_result[4]))
         except FileNotFoundError:
-            print(f"File not found: {file_path}")
+            print(f"File not found: sold.csv")
         except Exception as e:
             print(f"An error occurred: {e}")
 
@@ -59,26 +58,25 @@ class ReportGen:
             salePrice = salePrice + Decimal(s.price)
         print(f"Profit so far {abs(revenue - salePrice)}")
   
-    def show_Inventory(self):
-        bought = []
-        sold = []
-        inventory = []
+    def read_items_from_file(self, file_name, bought, sold):
+        items = []
         try:
-            with open("bought.csv", 'r') as file:
+            with open(file_name, 'r') as file:
                 for line in file:
                     split_result = line.split()
-                    current_object = datetime.strptime(self.current_time, "%Y-%m-%d")
-                    bought.append(Item(split_result[0], split_result[1], split_result[3], None, split_result[4]))
-            with open("sold.csv", 'r') as file:
-                for line in file:
-                    split_result = line.split()
-                    current_object = datetime.strptime(self.current_time, "%Y-%m-%d")
-                    sold.append(Item(split_result[0], split_result[1], None, split_result[2], split_result[4]))
+                    if bought:
+                        items.append(Item(split_result[0], split_result[1], split_result[3], None, split_result[4]))
+                    elif sold:
+                        items.append(Item(split_result[0], split_result[1], None, split_result[2], split_result[4]))
         except FileNotFoundError:
-            print(f"File not found: {file_path}")
+            print(f"File not found: {file_name}")
         except Exception as e:
             print(f"An error occurred: {e}")
+        return items
 
+    def show_Inventory(self):
+        bought = self.read_items_from_file("bought.csv", True, False)
+        sold = self.read_items_from_file("sold.csv", False, True)
         console = Console()
         table = Table(show_header=True, header_style="bold magenta")
         table.add_column("Product Name", style="dim", width=12)
@@ -95,21 +93,10 @@ class ReportGen:
         console.print(table)
 
     def show_Inventory_InChart(self):
-        bought = []
-        sold = []
-        inventory = []
+        bought = self.read_items_from_file("bought.csv", True, False)
+        sold = self.read_items_from_file("sold.csv", False, True)
         colors = {}
         try:
-            with open("bought.csv", 'r') as file:
-                for line in file:
-                    split_result = line.split()
-                    current_object = datetime.strptime(self.current_time, "%Y-%m-%d")
-                    bought.append(Item(split_result[0], split_result[1], split_result[3], None, split_result[4]))
-            with open("sold.csv", 'r') as file:
-                for line in file:
-                    split_result = line.split()
-                    current_object = datetime.strptime(self.current_time, "%Y-%m-%d")
-                    sold.append(Item(split_result[0], split_result[1], None, split_result[2], split_result[4]))
             with open("products.csv", 'r') as file:
                 for line in file:
                     split_result = line.split()
@@ -117,7 +104,7 @@ class ReportGen:
                     color = split_result[1]
                     colors[name] = color
         except FileNotFoundError:
-            print(f"File not found: {file_path}")
+            print(f"File not found: products.csv")
         except Exception as e:
             print(f"An error occurred: {e}")
 

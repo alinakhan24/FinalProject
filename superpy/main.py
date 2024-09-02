@@ -15,6 +15,7 @@ __human_name__ = "superpy"
 
 def buy_product(product_name, price, expiration_date, date):
     # Add your logic for buying the product here
+    succeed = False
     if os.path.exists("bought.csv"):
     # Append data to the existing CSV file
         id = 0
@@ -28,30 +29,38 @@ def buy_product(product_name, price, expiration_date, date):
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
             id = id+ 1
             spamwriter.writerow([product_name, price, expiration_date, date, id])
+            succeed = True
     else:
     # Create a new CSV file and write data
         with open('bought.csv', mode='w', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter=' ',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spamwriter.writerow([product_name, 1, price, expiration_date, date])
+            succeed = True
+    if succeed:
+        print("Successfully bought the product!")
         
 def sell_product(product_name, price, date):
     obj = CanSell(product_name)
+    succeed = False
     if obj is None:
-        print("ERROR: Product not in stock. ")
+        print("SORRY: Product not in stock. ")
     else:
         if os.path.exists("sold.csv"):
             with open('sold.csv', mode='a', newline='') as csvfile:
                 spamwriter = csv.writer(csvfile, delimiter=' ',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 spamwriter.writerow([product_name, obj.price, price, date, obj.id])
+                succeed = True
         else:
         # Create a new CSV file and write data
             with open('sold.csv', mode='w', newline='') as csvfile:
                 spamwriter = csv.writer(csvfile, delimiter=' ',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 spamwriter.writerow([product_name, price, date])
-
+                succeed = True
+    if succeed:
+        print("Successfully sold the product!")
 def advance_time(days):
     try:
         # Read current time from the file or set a default time
@@ -90,24 +99,26 @@ def now_Or_Yesterday(now=False, yesterday=False):
 
     return current_time.strftime("%Y-%m-%d")
 
+def read_items_from_file(product, file_name, bought=False, sold=False):
+        items = []
+        try:
+            with open(file_name, 'r') as file:
+                for line in file:
+                    split_result = line.split()
+                    if split_result[0] == product:
+                        if bought:
+                            items.append(Item(split_result[0], split_result[1], split_result[3], None, split_result[4]))
+                        elif sold:
+                            items.append(Item(split_result[0], split_result[1], None, split_result[2], split_result[4]))
+        except FileNotFoundError:
+            print(f"File not found: {file_name}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        return items
+
 def CanSell(product):
-    bought = []
-    sold = []
-    try:
-        with open("bought.csv", 'r') as file:
-         for line in file:
-            split_result = line.split()
-            if split_result[0] == product:
-                bought.append(Item(split_result[0], split_result[1], split_result[3], None, split_result[4]))
-        with open("sold.csv", 'r') as file:
-         for line in file:
-            split_result = line.split()
-            if split_result[0] == product:
-                sold.append(Item(split_result[0], split_result[1], None, split_result[2], split_result[4]))
-    except FileNotFoundError:
-        print(f"File not found: {file_path}")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    bought = read_items_from_file(product, "bought.csv", bought=True)
+    sold = read_items_from_file(product, "sold.csv", sold=True)
 
     new_bought = [b for b in bought if not any(b.id == s.id for s in sold)]   
     if new_bought:

@@ -1,0 +1,47 @@
+*******************************************************************************************
+How does Superpy Work?
+*******************************************************************************************
+----------------------------------------------------------------------------------------------
+Time
+-----------------------------------------------------------------------------------------------
+
+The application works on time recorded in file current_time.txt. This time can be altered using time attribute:
+ - now
+ - yesterday
+ - or advance time can be set by passing advance-time value
+
+-----------------------------------------------------------------------------------------------------
+Buy Product
+-----------------------------------------------------------------------------------------------------
+Product can be bought by providing following command
+
+
+python main.py buy --product-name orange --price 2 --expiration-date 11-02-2024
+
+Bought product will appear in bought.csv file
+User will see message "Successfully bought the product!"
+
+---------------------------------------------------------------------------------------------------------
+Sell Product
+---------------------------------------------------------------------------------------------------------
+
+Product can be sold by providing following command
+
+
+python main.py sell --product-name orange --price 2
+
+Sold product will appear in sold.csv file
+User will see message "Successfully sold the product!"
+
+--------------------------------------------------------------------------------------------------------------------
+Actions
+--------------------------------------------------------------------------------------------------------------------
+4 type of actions can be possible
+
+>>Inventory: To show all avaibale items in stock, in table
+	python main.py report inventory
+>>Profit: python main.py report profit
+>>Revenue: python main.py report revenue
+>>Chart: To show all available items in stock, in bar diagram
+	python main.py report chart
+	
